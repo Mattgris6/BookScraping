@@ -2,13 +2,14 @@
 import requests
 from bs4 import BeautifulSoup
 import csv
+import os
 
 #On récupère le lien de la page du livre
 url = "http://books.toscrape.com/catalogue/its-only-the-himalayas_981/index.html"
 response = requests.get(url)
 if response.ok:
     #On enregistre dans un csv
-    with open(r'C:\Users\MatthieuGRISON\OneDrive - AptiSkills\Documents\CoursOCR\ParcoursPython\Projet2\names.csv', 'w', newline='', encoding='utf-8') as csvfile:
+    with open(os.path.abspath(os.path.dirname(__file__)) + r'\Resultats\premier_livre.csv', 'w', newline='', encoding='utf-8') as csvfile:
         #Le titre des colonnes
         fieldnames = ['product_page_url', 'universal_ product_code (upc)', 'title', 'price_including_tax', 'price_excluding_tax', 'number_available', 'product_description', 'category', 'review_rating', 'image_url']
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames, delimiter=';')
