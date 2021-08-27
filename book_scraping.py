@@ -47,7 +47,7 @@ def categorie(url, nom):
 
 
 url = "http://books.toscrape.com"
-
+os.makedirs(os.path.abspath(os.path.dirname(__file__)) + r'\Resultats', exist_ok=True)#Création du répertoire "Resultats" où seront enregistrés les csv
 response = requests.get(url)
 if response.ok:
     soup = BeautifulSoup(response.content, 'html.parser')
