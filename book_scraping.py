@@ -5,25 +5,25 @@ import csv
 import os
 from tqdm import tqdm
 
-# Fonction de récupération des infos d'un bouquin sous forme de dictionnaire
 def get_book_infos(url):
+    """Get book's info from an url and return a dictionnary"""
     response = requests.get(url)
     if response.status_code == 200:
-        # On reforme le lien sans les \..
-        lien = response.url
+        # We get the link without the \..
+        link = response.url
         soup = BeautifulSoup(response.content, 'html.parser')
         search_img = soup.find('div', {"class": "item active"}).find('img')["src"]
-        image_lien = requests.get(f"http://books.toscrape.com/{search_img}").url
-        # Les infos du produit sont dans des balises tr
+        image_link = requests.get(f"http://books.toscrape.com/{search_img}").url
+        # Product info are in balise tr
         trs = soup.findAll('tr')
-        # Dictionnaire de récupération des infos
+        # Stocking the info in a dictionnary
         dict_tr = {}
         for tr in trs:
             th = tr.find('th').text
             td = tr.find('td').text
             dict_tr[th] = td
-    # On renvoit les infos du bouquin
-    return {'product_page_url': lien,
+    # All the informations of the book that we need
+    return {'product_page_url': link,
             'universal_ product_code (upc)': dict_tr['UPC'],
             'title': soup.find('h1').text,
             'price_including_tax': dict_tr['Price (incl. tax)'],
@@ -32,40 +32,42 @@ def get_book_infos(url):
             'product_description': soup.findAll('meta')[2]["content"],
             'category': soup.findAll('li')[2].find('a').text,
             'review_rating': soup.findAll('p')[2]["class"][1],
-            'image_url': image_lien}
+            'image_url': image_link}
 
 
-def pass_category(url, nom):
-    print(f"Passage de la catégorie {nom}...")
-    # La liste des bouquins trouvés
+def pass_category(url, name):
+    """Get all books of one category and then send it to the writer function"""
+    print(f"Passage de la catégorie {name}...")
+    # Initialize list of books
     books = []
     while url != '':
         response = requests.get(url)
         if response.status_code == 200:
             soup = BeautifulSoup(response.content, 'html.parser')
-            # Les livres sont rangés dans les balises article
+            # Books are notify with article balise
             articles = soup.findAll('article', {'class': 'product_pod'})
             for article in tqdm(articles):
-                # On récupère le lien du bouquin
-                lien = url + "/../" + article.find('h3').find('a')['href']
-                # On lance la fonction sur le lien du bouquin
-                dict_product = get_book_infos(lien)
+                # Get the book's link
+                link = url + "/../" + article.find('h3').find('a')['href']
+                # Run the function to get book's info
+                dict_product = get_book_infos(link)
                 books.append(dict_product)
-            # On regarde s'il y a une page de plus, et si c'est le cas on récupère le lien
+            # Searching for a next page
             next_page = soup.find('li', {'class': 'next'})
             if not next_page:
                 url = ''
             else:
                 url = url + "/../" + soup.find('li', {'class': 'next'}).find('a')['href']
-    write_category(nom, books)
+    write_category(name, books)
 
 
-def write_category(nom, books):
-    print(f"Ecriture de la categorie {nom}...")
-    # On enregistre dans un csv
-    csv_path = os.path.abspath(os.path.dirname(__file__)) + r'\Resultats\\' + nom + '.csv'
+def write_category(name, books):
+    """Write the informations of books of one category in one csv file"""
+    print(f"Ecriture de la categorie {name}...")
+    # Save in one csv file
+    csv_path = os.path.abspath(os.path.dirname(__file__)) + r'\Results\\' + name + '.csv'
     with open(csv_path, 'w', newline='', encoding='utf-8') as csvfile:
-        # Le titre des colonnes
+        # Headers name
         fieldnames = ['product_page_url',
                       'universal_ product_code (upc)',
                       'title', 'price_including_tax',
@@ -78,18 +80,18 @@ def write_category(nom, books):
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames, delimiter=';')
         writer.writeheader()
         for book in books:
-            # On écrit les infos du bouquin
+            # Writing the book's infos
             writer.writerow(book)
 
 
 url = "http://books.toscrape.com"
-# Création du répertoire "Resultats" où seront enregistrés les csv
-os.makedirs(os.path.abspath(os.path.dirname(__file__)) + r'\Resultats', exist_ok=True)
+# Create a folder "Results" where we'll save the csv
+os.makedirs(os.path.abspath(os.path.dirname(__file__)) + r'\Results', exist_ok=True)
 response = requests.get(url)
 if response.status_code == 200:
     soup = BeautifulSoup(response.content, 'html.parser')
-    list_categorie = soup.find('ul', {'class': 'nav nav-list'}).find('ul').findAll('li')
-    for li in list_categorie:
-        lien = url + '/' + li.find('a')['href']
-        nom = li.find('a').text.replace('\n', '').replace('  ', '')
-        pass_category(lien, nom)
+    list_category = soup.find('ul', {'class': 'nav nav-list'}).find('ul').findAll('li')
+    for li in list_category:
+        link = url + '/' + li.find('a')['href']
+        name = li.find('a').text.replace('\n', '').replace('  ', '')
+        pass_category(link, name)

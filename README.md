@@ -2,7 +2,7 @@
 Téléchargez les scripts présents sur le dépôt GitHub : https://github.com/Mattgris6/OC_DAPyhon_Projet2_BookScraping
 Placez ces scripts dans un répertoire de travail sur votre ordinateur.
 
-Pour créer un environnement virtuel, dans votre terminal, placez vous dans votre répertoire de travail via la commande cd (+ chemin du répertoire).
+Pour créer un environnement virtuel sous Windows, dans votre terminal, placez vous dans votre répertoire de travail via la commande cd (+ chemin du répertoire).
 Ensuite, tapez la commande :
 
 ```sh
@@ -13,7 +13,7 @@ Un nouveau répertoire env s'est créé dans votre répertoire de travail.
 Pour l'activer, tapez la commande :
 
 ```sh
-env/Scripts/activate.bat
+./env/Scripts/activate.bat
 ```
 
 Maintenant que vous êtes dans l'environnement virtuel, installez les paquets requis pour le code via la commande:
